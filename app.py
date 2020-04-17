@@ -92,7 +92,7 @@ def disconnect():
     if player is not None:
         db.session.delete(player)
         db.session.commit()
-        room = Room.query.filter_by(name=player.room_name).first().Users
+        room = Room.query.filter_by(name=player.room_name).first()
         if room.Users is None:
             db.session.delete(room)
             db.session.commit()
