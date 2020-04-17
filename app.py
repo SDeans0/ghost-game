@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 import flask_sqlalchemy as sql
 
 import random, string
+import words
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -70,8 +71,7 @@ def join_game(data):
 @socketio.on('start')
 def start_game(game_data):
     '''Starts the game'''
-    word_corpus = ['Codenames','Werewolf','Catan','Croquet','Hall?']
-    word = random.choice(word_corpus)
+    word = random.choice(words.words)
     room = game_data['room']
     print(game_data)
     players = User.query.filter_by(room_name=room).all()
