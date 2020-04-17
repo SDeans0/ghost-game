@@ -5,10 +5,51 @@
     <title>Sam's Games Cupboard</title>
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
     <script type="text/javascript" src='static/ghost.js'></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   </head>
   <body>
-    <h1>Game page</h1>
-    <button type="button" id="start" onclick=start()>Begin Game</button>
-    <p id='word_placeholder'></p>
+    <section class='section is-small'>
+      <div class="columns">
+        <div class="column content has-text-centered">
+          <a href = '/'>
+            <h1 class="title">Ghost game</h1>
+          </a>
+        </div>
+      </div>
+    </section>
+    <section class="section is-small">
+      <div class='columns'>
+        <div class="column content has-text-centered">
+          <h2>Rules:</h2>
+          <p>All the players will be shown a word, except for one - the ghost.</p>
+          <p>Starting with a particular player, each describes the word they saw. The ghost must try to fit in with the others.</p>
+          <p>After a fixed number of rounds, or time (your choice), all players must vote for who they think ghost is.</p>
+          <p>If the players fail to choose the ghost, they lose.</p>
+          <p>If they succeed, the ghost has one more chance to win - if they guess the word that the other players saw correctly.</p>
+          <h2>To play:</h2>
+          <p>When you are ready to start a new game, press the button below.</p>
+          <p>Your word will appear below the button.</p>
+        </div>
+      </div>
+      <div class='columns'>
+        <div class="column content has-text-centered">
+          <button class="button is-large" id="start" onclick=start()>Begin Game</button>
+        </div>
+      </div>
+      <div class='columns'>
+        <div class="column content has-text-centered">
+          <p id='word_placeholder'></p>
+        </div>
+      </div>
+    </section>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong>Ghost</strong> by <a href="https://www.github.com/sdeans0">Sam Deans</a>. The website content
+          is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
+        </p>
+      </div>
+    </footer>
   </body>
 </html>
