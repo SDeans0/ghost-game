@@ -41,7 +41,7 @@ class User(db.Model):
 def index():
     return render_template('index.html')
 
-@app.route('/<room>')
+@app.route('/ghost/<room>')
 def ghost(room):
     exists = Room.query.filter_by(name=room).first()
     if exists is not None:
@@ -49,16 +49,24 @@ def ghost(room):
     else:
         return redirect(url_for('index'))
 
+@app.route('/ranwords/<room>')
+def ranwords(room):
+    exists = Room.query.filter_by(name=room).first()
+    if exists is not None:
+        return render_template('ranwords_page.html')
+    else:
+        return redirect(url_for('index'))
+
 ##### Socketio responses
 
 @socketio.on('newGame')
-def new_game():
+def new_game(data):
     room_name = ''.join(random.choice(string.ascii_lowercase) for i in range(4))
     room = Room(room_name)
     db.session.add(room)
     db.session.commit()
-    print(url_for('ghost',room=room_name))
-    emit('redirect', {'url': url_for('ghost',room=room_name)})
+    print(url_for(data['game'],room=room_name))
+    emit('redirect', {'url': url_for(data['game'],room=room_name)})
 
 @socketio.on('joinGame')
 def join_game(data):
@@ -68,7 +76,7 @@ def join_game(data):
     db.session.commit()
     emit('joined room',{'room':room},room=request.sid)
 
-@socketio.on('start')
+@socketio.on('start',namespace='ghost')
 def start_game(game_data):
     '''Starts the game'''
     word = random.choice(words.words)
@@ -81,6 +89,20 @@ def start_game(game_data):
         emit('word',{'word':word},room=player.sid)
     emit('word',{'word':'You are the ghost!'},room=ghost.sid)
     emit('begin game',{'message':'Begin the game'},room=room)
+
+@socketio.on('start',namespace='ranwords')
+def start_game(game_data):
+    '''Starts the game'''
+    word = random.choice(words.words)
+    room = game_data['room']
+    print(game_data)
+    emit('word',{'word':word},room=room)
+    emit('begin game',{'message':'Begin the game'},room=room)
+
+@socketio.on('message',namespace='ranwords')
+def message(payload):
+    '''Reflects a message to the scratchpad'''
+    emit('message',{'msg':data['msg']},room=data['room'])
 
 @socketio.on('connect')
 def connect():

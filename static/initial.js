@@ -13,6 +13,10 @@ socket.on('redirect', function (data) {
   window.location = data.url;
 });
 
-function newGame(){
-  socket.emit('newGame');
+function newGhost(){
+  socket.emit('newGame',{game:'ghost'});
+}
+
+function newRanwords(){
+  socket.emit('newGame',{game:'ranwords'});
 }
