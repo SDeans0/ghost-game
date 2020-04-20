@@ -68,7 +68,8 @@ def new_game(data):
     print(url_for(data['game'],room=room_name))
     emit('redirect', {'url': url_for(data['game'],room=room_name)})
 
-@socketio.on('joinGame')
+@socketio.on('joinGame',namespace='/ranwords')
+@socketio.on('joinGame',namespace='/ghost')
 def join_game(data):
     room = data['url'].replace('/','')[-4:]
     join_room(room)
