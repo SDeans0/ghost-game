@@ -76,7 +76,7 @@ def join_game(data):
     db.session.commit()
     emit('joined room',{'room':room},room=request.sid)
 
-@socketio.on('start',namespace='ghost')
+@socketio.on('start',namespace='/ghost')
 def start_game(game_data):
     '''Starts the game'''
     word = random.choice(words.words)
@@ -90,7 +90,7 @@ def start_game(game_data):
     emit('word',{'word':'You are the ghost!'},room=ghost.sid)
     emit('begin game',{'message':'Begin the game'},room=room)
 
-@socketio.on('start',namespace='ranwords')
+@socketio.on('start',namespace='/ranwords')
 def start_game(game_data):
     '''Starts the game'''
     word = random.choice(words.words)
@@ -99,7 +99,7 @@ def start_game(game_data):
     emit('word',{'word':word},room=room)
     emit('begin game',{'message':'Begin the game'},room=room)
 
-@socketio.on('message',namespace='ranwords')
+@socketio.on('message',namespace='/ranwords')
 def message(payload):
     '''Reflects a message to the scratchpad'''
     emit('message',{'msg':data['msg']},room=data['room'])
