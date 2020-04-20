@@ -31,7 +31,9 @@
       <div class='columns'>
         <div class="column content has-text-centered">
           <textarea id="scratchpad" rows=8 cols=80></textarea><br>
-          <input type='text' id='entry'><button onlick=message()>Send</button>
+          <form id='entry'>
+            <input type='text' id='msg' name='msg' value = ''><input type='submit' value='Send'>
+          </form>
         </div>
       </div>
       <div class='columns'>

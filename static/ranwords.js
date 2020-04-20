@@ -27,8 +27,22 @@ function start(){
   console.log('start');
 };
 
-function message(){
-  socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:document.getElementById('entry').value});
-  document.getElementById('entry').value = '';
-  console.log('message');
-};
+window.addEventListener( "load", function () {
+  function sendData() {
+
+    // Bind the FormData object and the form element
+    const FD = new FormData( form );
+    socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:FD.entries().next().value[1]});
+  }
+
+  // Access the form element...
+  const form = document.getElementById( "entry" );
+
+  // ...and take over its submit event.
+  form.addEventListener( "submit", function ( event ) {
+    event.preventDefault();
+    console.log('called')
+    sendData();
+    form.reset();
+  } );
+} );
