@@ -40,7 +40,7 @@ window.addEventListener( "load", function () {
 
   // ...and take over its submit event.
   form.addEventListener( "submit", function ( event ) {
-    event.preventDefault();
+    event.preventDefault(event);
     console.log('called')
     sendData();
     form.reset();
