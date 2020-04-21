@@ -111,6 +111,8 @@ def connect():
     print('client connected')
 
 @socketio.on('disconnect')
+@socketio.on('disconnect',namespace='/ranwords')
+@socketio.on('disconnect',namespace='/ghost')
 def disconnect():
     player = User.query.filter_by(sid=request.sid).first()
     if player is not None:
