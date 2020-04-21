@@ -28,11 +28,9 @@ function start(){
 };
 
 window.addEventListener( "load", function () {
-  function sendData() {
-
-    // Bind the FormData object and the form element
-    const FD = new FormData( form );
-    socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:FD.entries().next().value[1]});
+  function sendData(formFields,username) {
+    const message = username + ': ' + formFields.next().value[1];
+    socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:message});
   }
 
   // Access the form element...
@@ -42,7 +40,11 @@ window.addEventListener( "load", function () {
   form.addEventListener( "submit", function ( event ) {
     event.preventDefault(event);
     console.log('called')
-    sendData();
+    const FD = new FormData( form );
+    const formFields = FD.entries();
+    const username = formFields.next().value[1];
+    sendData(formFields,username);
     form.reset();
+    document.getElementById('user').defaultValue = username;
   } );
 } );
