@@ -115,10 +115,12 @@ def connect():
 @socketio.on('disconnect',namespace='/ghost')
 def disconnect():
     player = User.query.filter_by(sid=request.sid).first()
+    print(player)
     if player is not None:
         db.session.delete(player)
         db.session.commit()
         room = Room.query.filter_by(name=player.room_name).first()
+        print(room)
         if room.Users is None:
             db.session.delete(room)
             db.session.commit()
