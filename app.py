@@ -121,6 +121,7 @@ def disconnect():
         db.session.commit()
         room = Room.query.filter_by(name=player.room_name).first()
         print(room)
+        print(room.Users)
         if room.Users is None:
             db.session.delete(room)
             db.session.commit()
