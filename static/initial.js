@@ -20,3 +20,7 @@ function newGhost(){
 function newRanwords(){
   socket.emit('newGame',{game:'ranwords'});
 }
+
+function newBlackmaria(){
+  socket.emit('newGame',{game:'blackmaria'});
+}

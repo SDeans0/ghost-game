@@ -42,19 +42,11 @@ class User(db.Model):
 def index():
     return render_template('index.html')
 
-@app.route('/ghost/<room>')
-def ghost(room):
+@app.route('/<game>/<room>')
+def start_game(game,room):
     exists = Room.query.filter_by(name=room).first()
     if exists is not None:
-        return render_template('ghost_page.html')
-    else:
-        return redirect(url_for('index'))
-
-@app.route('/ranwords/<room>')
-def ranwords(room):
-    exists = Room.query.filter_by(name=room).first()
-    if exists is not None:
-        return render_template('ranwords_page.html')
+        return render_template(game+'_page.html')
     else:
         return redirect(url_for('index'))
 
@@ -66,9 +58,10 @@ def new_game(data):
     room = Room(room_name)
     db.session.add(room)
     db.session.commit()
-    print(url_for(data['game'],room=room_name))
-    emit('redirect', {'url': url_for(data['game'],room=room_name)})
+    print(url_for('start_game',game=data['game'],room=room_name))
+    emit('redirect', {'url': url_for('start_game',game=data['game'],room=room_name)})
 
+@socketio.on('joinGame',namespace='/blackmaria')
 @socketio.on('joinGame',namespace='/ranwords')
 @socketio.on('joinGame',namespace='/ghost')
 def join_game(data):
@@ -101,27 +94,47 @@ def start_game(game_data):
     emit('word',{'word':word},room=room)
     emit('begin game',{'message':'Begin the game'},room=room)
 
+@socketio.on('start',namespace='/blackmaria')
+def start_game(game_data):
+    '''Starts the game'''
+    room = User.query.filter_by(room_name=game_data['room']).all()
+    if len(room) >= game_data['n_players']:
+        players = room[:game_data['n_players']]
+        deck = [{'suit':suit,'value':value} for suit in ['clubs','spades','diamonds','hearts'] for value in range(2,15)]
+        if game_data['n_players'] == 3:
+            deck = deck[1:]
+        hand_size = len(deck)//game_data['n_players']
+        random.shuffle(deck)
+        for index,player in enumerate(players):
+            hand = deck[:hand_size]
+            deck = deck[hand_size:]
+            emit('begin game',{'hand':hand,'player':index,'n_players':game_data['n_players']},room=player.sid)
+    else:
+        emit('too few players',room=request.sid)
+
 @socketio.on('message',namespace='/ranwords')
 def message(data):
     '''Reflects a message to the scratchpad'''
     emit('message',{'msg':data['msg']},room=data['room'])
 
+@socketio.on('card played',namespace='/blackmaria')
+def card_played(data):
+    emit('card played',data,room=data['room'])
+
 @socketio.on('connect')
 def connect():
-    print('client connected')
+    print('Client connected')
 
 @socketio.on('disconnect')
+@socketio.on('disconnect',namespace='/blackmaria')
 @socketio.on('disconnect',namespace='/ranwords')
 @socketio.on('disconnect',namespace='/ghost')
 def disconnect():
     player = User.query.filter_by(sid=request.sid).first()
-    print(player)
     if player is not None:
         db.session.delete(player)
         db.session.commit()
         room = Room.query.filter_by(name=player.room_name).first()
-        print(room)
-        print(room.Users)
         if room.Users == []:
             db.session.delete(room)
             db.session.commit()
