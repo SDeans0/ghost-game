@@ -4,12 +4,13 @@ import flask_sqlalchemy as sql
 
 import random, string
 import words
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://uahbbqqegyqwia:5c2f30f0fdc02a2ecb1bb18543596e67768d8939c6e038477b8dc022175dfa2d@ec2-54-247-125-38.eu-west-1.compute.amazonaws.com:5432/dd1tki6p691uk7'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://uahbbqqegyqwia:5c2f30f0fdc02a2ecb1bb18543596e67768d8939c6e038477b8dc022175dfa2d@ec2-54-247-125-38.eu-west-1.compute.amazonaws.com:5432/dd1tki6p691uk7'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 socketio = SocketIO(app)
 db = sql.SQLAlchemy(app)
 
@@ -120,6 +121,16 @@ def message(data):
 @socketio.on('card played',namespace='/blackmaria')
 def card_played(data):
     emit('card played',data,room=data['room'])
+
+@socketio.on('pass cards',namespace='/blackmaria')
+def pass_cards(data):
+    room = User.query.filter_by(room_name=data['room']).all()
+    sender = int(data['player'])
+    receiver = (sender +1) % int(data['n_players'])
+    emit('receive cards',{'passing_cards':data['cards']},room=room[receiver].sid)
+    time.sleep(0.25)
+    emit('passed cards',{'sender':sender},room=data['room'])
+
 
 @socketio.on('connect')
 def connect():

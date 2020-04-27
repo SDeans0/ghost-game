@@ -17,20 +17,35 @@
           </a>
         </div>
       </div>
-    </section>
-    <section class="section is-small">
-      <div class='columns'>
-        <div class="column content has-text-centered">
-          <h2>Rules:</h2>
-          Black Maria is a trick taking game with no trumps.
-          Hearts won in any trick are penalty points (face value, 10 for royalty, 15 for the Ace), as is the Queen of Spades (50).
-          A third of the deck is dealt to each player (minus the 2 of clubs in 3P mode).
-          The person who opened the room begins the game.
-          After that, the winner of the trick leads.
-          <h2>To play:</h2>
-          <p>When you are ready to start a new game, press one of the buttons below.</p>
-          <p>Your hand will appear at the bottom of the screen.
-          Click on a card to play it.</p>
+      <div class='columns has-text-justified'>
+        <div class="column content" id='rules'>
+          <h2>Rules</h2>
+            <p>Black Maria is a trick taking game with no trumps.
+            Hearts won in any trick are penalty points (face value, 10 for royalty, 15 for the Ace), as is the Queen of Spades (50 points).
+            A third of the deck is dealt to each player (minus the 2 of clubs in three player mode).
+            Before play, you pass three cards onto the next player.
+            The person who opened the room begins the game.
+            After that, the winner of the trick leads.
+            </p>
+          </div>
+          <div class="column content">
+            <h3>Passing Cards</h3>
+            <p>Click one of the buttons below. Your hand will appear at the bottom of the screen.
+            Click on cards to select them. If you need to take them back, just click on it again.
+            Once you have selected three cards to pass, click the passing button</p>
+          </div>
+          <div class="column content">
+            <h3>Play</h3>
+              <p>Once all players have passed, the new cards will be added to your hand.
+              You can play a card on your turn by clicking on it, but you can't take it back.
+              Cards played by each player will appear in the corresponding spot.</p>
+          </div>
+        </div>
+        <div class='columns'>
+          <div class="column content has-text-centered" id='info'>
+          <div class="columns content has-text-centered">
+
+          </div>
         </div>
       </div>
       <div class='columns'>
@@ -41,9 +56,9 @@
           <button class="button is-medium" id="start" onclick="start(4)">Start 4-player game</button>
         </div>
       </div>
-      <div class="columns">
-        <div class='column content has-text-centered'>
-          <table class="table">
+      <div class='columns content has-text-centered' id='Play area'>
+        <div class='column is-mobile is-centered'>
+          <table class="table is-centred is-hidden" id='scoreboard'>
             <thead>
               <tr>
                 <th>Player ID</th>
@@ -51,21 +66,20 @@
               </tr>
             </thead>
             <tbody id='tally'>
-
             </tbody>
           </table>
         </div>
       </div>
-      <div class='columns content has-text-centered' id='Play area'>
-      </div>
-      <div class='columns content has-text-centered' id = 'hand'>
+      <div class='columns content has-text-centered is-gapless' id = 'hand'>
       </div>
     </section>
     <footer class="footer">
       <div class="content has-text-centered">
         <p>
-          Games implemented by <a href="https://www.github.com/sdeans0">Sam Deans</a>. 
+          Games implemented by <a href="https://www.github.com/sdeans0">Sam Deans</a>.
         </p>
+        <p>
+          Public Domain card assets from <a href='https://code.google.com/archive/p/vector-playing-cards/'>Google Code</a>
       </div>
     </footer>
   </body>
