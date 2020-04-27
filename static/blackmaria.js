@@ -100,6 +100,7 @@ function passCards(elem){
     }
     elem.remove();
     for (var i=0; i < hand.length+3;i++){
+      card_img = document.getElementById('card_'+i.toString());
       card_img.setAttribute('onClick', '');
     }
   }
