@@ -14,9 +14,11 @@ socket.on('word', function(msg){
   document.getElementById("scratchpad").value = '';
 })
 
+
 socket.on('begin game', function(msg){
   alert('The game has started');
 })
+
 
 socket.on('message', function(msg){
   document.getElementById("scratchpad").value += msg.msg + '\n';
@@ -27,9 +29,11 @@ function start(){
   console.log('start');
 };
 
+// Form handling code
 window.addEventListener( "load", function () {
   function sendData(formFields,username) {
     const message = username + ': ' + formFields.next().value[1];
+    //console.log(message)
     socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:message});
   }
 
@@ -39,10 +43,11 @@ window.addEventListener( "load", function () {
   // ...and take over its submit event.
   form.addEventListener( "submit", function ( event ) {
     event.preventDefault(event);
-    console.log('called')
+    //console.log('called')
     const FD = new FormData( form );
     const formFields = FD.entries();
     const username = formFields.next().value[1];
+    //console.log(username)
     sendData(formFields,username);
     form.reset();
     document.getElementById('user').defaultValue = username;
