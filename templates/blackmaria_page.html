@@ -18,6 +18,9 @@
         </div>
       </div>
       <div class='columns has-text-justified'>
+        <div class="column is-1">
+
+        </div>
         <div class="column content" id='rules'>
           <h2>Rules</h2>
             <p>Black Maria is a trick taking game with no trumps.
@@ -29,36 +32,35 @@
             </p>
           </div>
           <div class="column content">
-            <h3>Passing Cards</h3>
+            <h2>Play</h2>
             <p>Click one of the buttons below. Your hand will appear at the bottom of the screen.
             Click on cards to select them. If you need to take them back, just click on it again.
             Once you have selected three cards to pass, click the passing button.</p>
+            <p>Once all players have passed, the new cards will be added to your hand.
+            You can play a card on your turn by clicking on it, but you can't take it back.
+            Cards played by each player will appear in the corresponding spot.</p>
           </div>
-          <div class="column content">
-            <h3>Play</h3>
-              <p>Once all players have passed, the new cards will be added to your hand.
-              You can play a card on your turn by clicking on it, but you can't take it back.
-              Cards played by each player will appear in the corresponding spot.</p>
-          </div>
-        </div>
-        <div class='columns'>
-          <div class="column content has-text-centered" id='info'>
-          <div class="columns content has-text-centered">
-
+          <div class="column is-1">
           </div>
         </div>
-      </div>
       <div class='columns'>
+        <div class="column is-1">
+        </div>
         <div class="column content has-text-centered">
           <button class="button is-medium" id="start" onclick="start(3)">Start 3-player game</button>
         </div>
         <div class="column content has-text-centered">
           <button class="button is-medium" id="start" onclick="start(4)">Start 4-player game</button>
         </div>
+        <div class="column is-1">
+        </div>
       </div>
       <div class='columns content has-text-centered' id='Play area'>
-        <div class='column is-mobile is-centered is-hidden' id='scoreboard'>
-          <table class="table is-centred">
+        <div class="column is-1">
+        </div>
+        <div class='column is-mobile has-text-justified is-hidden is-3' id='scoreboard'>
+          <h3>Game status</h3>
+          <table class="table has-text-centred is-narrow">
             <thead>
               <tr>
                 <th>Player</th>
@@ -68,12 +70,13 @@
             <tbody id='tally'>
             </tbody>
           </table>
-          <h4>Game status</h4>
-          <ul>
+          <ul style="list-style-type:none;margin-left:0;">
             <li id="turn"></li>
             <li id='trick'></li>
             <li id='pass'></li>
           </ul>
+        </div>
+        <div id="bookend" class="column is-1">
         </div>
       </div>
       <div class='columns is-centered is-gapless is-multiline' id = 'hand'>

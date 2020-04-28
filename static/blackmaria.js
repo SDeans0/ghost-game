@@ -16,6 +16,7 @@ let passed = [];
 let received_cards = [];
 let play_area;
 let tally;
+let bookend;
 
 function getName(cardValue){
     if (cardValue < 11){
@@ -73,7 +74,7 @@ function setReceived(){
   let pass_item = document.getElementById('pass');
   if (received_cards.length===3){
     pass_item.setAttribute('class','');
-    pass_text = 'Cards received from Player ' + ((player +2) % n_players + 1).toString() + ': ';
+    pass_text = 'Cards received from Player ' + (((player +n_players-1) % n_players) + 1).toString() + ': ';
     for (var i=0; i<3;i++){
       pass_text += 'the ' + getName(received_cards[i].value) + ' of ' + suitEmoji[received_cards[i].suit] + ', ';
     }
@@ -144,7 +145,7 @@ function passCards(elem){
       staging_card.src = '/static/cards/blank_of_blanks.svg';
       staging_card.setAttribute('onClick', '');
     }
-    elem.remove();
+    elem.parentNode.remove();
     for (var i=0; i < hand.length+3;i++){
       card_img = document.getElementById('card_'+i.toString());
       card_img.setAttribute('onClick', '');
@@ -259,6 +260,10 @@ socket.on('begin game', function(game_data){
   received_cards = [];
   // Selecting key elements from the game play area
   play_area = document.getElementById('Play area');
+  bookend = document.getElementById('bookend');
+  if(bookend){
+    bookend.remove();
+  }
   tally = document.getElementById('tally');
   hand_element = document.getElementById('hand');
   // Set up the empty playing cards and the score table
@@ -267,7 +272,7 @@ socket.on('begin game', function(game_data){
     if (!document.getElementById(i.toString())){
       // Set up the cards
       player_spot = document.createElement('div');
-      player_spot.setAttribute('class','column is-narrow');
+      player_spot.setAttribute('class','column');
       player_card = document.createElement('img');
       player_card.id=i.toString();
       player_card.src='/static/cards/blank_of_blanks.svg';
@@ -295,7 +300,6 @@ socket.on('begin game', function(game_data){
       player_score_cell = document.getElementById('tally_'+i.toString());
       player_score_cell.innerHTML = '0';
       if (i==player){
-        console.log(player_score_row.childNodes[0])
         player_score_cell.parentNode.childNodes[0].setAttribute('class',"is-selected");
       } else{
         player_score_cell.parentNode.childNodes[0].setAttribute('class',"");
@@ -314,8 +318,8 @@ socket.on('begin game', function(game_data){
   }
   // Unhide the table and information panel if they are hidden
   let table_col = document.getElementById('scoreboard');
-  if (table_col.getAttribute('class')=="column is-mobile is-centered is-hidden"){
-    table_col.setAttribute('class',"column is-mobile is-centered ");
+  if (table_col.getAttribute('class').search("is-hidden")>=0){
+    table_col.setAttribute('class',table_col.getAttribute('class').replace('is-hidden',''));
   }
   // Reset the information panel
   setTurn();
@@ -323,13 +327,20 @@ socket.on('begin game', function(game_data){
   setReceived();
   // Add a button to pass a card
   if (!document.getElementById('pass_button')){
+    pass_button_col = document.createElement('div');
+    pass_button_col.setAttribute('class','column');
     pass_button = document.createElement('button');
     pass_button.setAttribute('id','pass_button');
     pass_button.setAttribute('onClick','passCards(this)');
     pass_button.setAttribute('class',"button is-medium");
     pass_button.innerHTML='Pass Three Cards';
-    play_area.appendChild(pass_button);
+    pass_button_col.appendChild(pass_button);
+    play_area.appendChild(pass_button_col);
   }
+  bookend = document.createElement('div');
+  bookend.setAttribute('class','column is-1');
+  bookend.setAttribute('id','bookend');
+  play_area.appendChild(bookend);
   // Sort the cards
   hand.sort(function(a,b){return(compare_cards(a,b))});
   // Clear any existing hand
@@ -341,7 +352,7 @@ socket.on('begin game', function(game_data){
     card_col = document.createElement('div');
     card_col.setAttribute('class','column has-text-centered is-centered is-narrow');
     card_img = document.createElement('img');
-    card_img.setAttribute('style','min-width:85px');
+    card_img.setAttribute('style','min-width:80px');
     card_img.setAttribute('style','max-width:120px');
     card_img.setAttribute('class','is-narrow');
     card_img.src = '/static/cards/' + getName(hand[i].value) + '_of_' + hand[i].suit + '.svg';
