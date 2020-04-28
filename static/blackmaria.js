@@ -222,7 +222,7 @@ socket.on('card played', function(data){
     setTurn();
   }
   if(rounds === 0){
-    alert('game over')
+    alert('Game Over!')
   }
 
 });
@@ -237,7 +237,7 @@ socket.on('joined room', function(msg){
 });
 
 socket.on('too few players',function(){
-  alert('too few players')
+  alert('There are too few players in the room.')
 })
 
 socket.on('begin game', function(game_data){
