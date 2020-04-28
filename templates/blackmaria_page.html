@@ -57,20 +57,26 @@
         </div>
       </div>
       <div class='columns content has-text-centered' id='Play area'>
-        <div class='column is-mobile is-centered'>
-          <table class="table is-centred is-hidden" id='scoreboard'>
+        <div class='column is-mobile is-centered is-hidden' id='scoreboard'>
+          <table class="table is-centred">
             <thead>
               <tr>
-                <th>Player ID</th>
-                <th>Player Score</th>
+                <th>Player</th>
+                <th>Score</th>
               </tr>
             </thead>
             <tbody id='tally'>
             </tbody>
           </table>
+          <h4>Play</h4>
+          <ul>
+            <li id="turn"></li>
+            <li id='trick'></li>
+            <li id='pass'></li>
+          </ul>
         </div>
       </div>
-      <div class='columns content has-text-centered is-gapless' id = 'hand'>
+      <div class='columns is-centered is-gapless is-multiline' id = 'hand'>
       </div>
     </section>
     <footer class="footer">

@@ -1,6 +1,8 @@
 let socket = io('/blackmaria');
+
+let suitEmoji = {'clubs':'♣️','hearts':'♥️','diamonds':'♦️','spades':'♠️'};
 let last_card = {suit:'',value:0};
-let winner = 0;
+let winner = -1;
 let hand_points = 0;
 let players = [];
 let rounds = 0;
@@ -12,7 +14,8 @@ let passing_cards = [];
 let hand_element;
 let passed = [];
 let received_cards = [];
-
+let play_area;
+let tally;
 
 function getName(cardValue){
     if (cardValue < 11){
@@ -33,10 +36,53 @@ function getPoints(value,suit){
   }
 }
 
+function compare_cards(a,b){
+  if (a.suit===b.suit){
+    return(a.value > b.value);
+  } else {
+    let suits = ['clubs','diamonds','spades','hearts'];
+    return suits.indexOf(a.suit) > suits.indexOf(b.suit);
+  }
+}
+
 function start(n){
   socket.emit('start',{n_players:n,room: window.sessionStorage.getItem('room')});
   console.log('start');
 };
+
+function setTurn(){
+  let turn=document.getElementById('turn');
+  if (current_player < 0){
+    turn.innerHTML = "Pass three cards to the next player"
+  } else {
+    turn.innerHTML = "It's Player " + (current_player +1).toString() +"'s turn";
+  }
+}
+
+function setTrick(){
+  let trick=document.getElementById('trick');
+  if(winner < 0){
+    trick.setAttribute('class','is-hidden');
+  } else {
+    trick.setAttribute('class','');
+    trick.innerHTML = "Player " + (winner +1).toString() + " won the last trick"
+  }
+}
+
+function setReceived(){
+  let pass_item = document.getElementById('pass');
+  if (received_cards.length===3){
+    pass_item.setAttribute('class','');
+    pass_text = 'Cards received from Player ' + ((player +2) % n_players + 1).toString() + ': ';
+    for (var i=0; i<3;i++){
+      pass_text += 'the ' + getName(received_cards[i].value) + ' of ' + suitEmoji[received_cards[i].suit] + ', ';
+    }
+    pass_text =  pass_text.slice(0, -2); //Remove trailing comma
+    pass_item.innerHTML = pass_text;
+  } else {
+    pass_item.setAttribute('class','is-hidden');
+  }
+}
 
 function playCard(elem){
   if (current_player===player && (elem.dataset.suit == last_card.suit || hand.filter(card => card.suit==last_card.suit).length === 0)) {
@@ -114,9 +160,9 @@ socket.on('passed cards',function(data){
   passed[data.sender] = 1;
   if(passed.reduce((a, b) => a + b, 0) == n_players){
     hand = hand.concat(received_cards);
-    // Prepare the hand
-    hand.sort(function(a,b){return(a.suit === b.suit ? (a.value > b.value ? 1 : -1) : (a.suit > b.suit ? 1 : -1))});
-    // Put the new cards in the hand
+    // Sort the cards
+    hand.sort(function(a,b){return(compare_cards(a,b))});
+    // Display the new cards in the hand
     for (var i=0; i < hand.length;i++){
       card_img = document.getElementById('card_'+i.toString());
       card_img.src = '/static/cards/' + getName(hand[i].value) + '_of_' + hand[i].suit + '.svg';
@@ -124,6 +170,9 @@ socket.on('passed cards',function(data){
       card_img.setAttribute('data-value',hand[i].value);
       card_img.setAttribute('onClick', 'playCard(this)');
     }
+    current_player = 0;
+    setTurn();
+    setReceived();
   }
 });
 
@@ -147,6 +196,8 @@ socket.on('card played', function(data){
   if(cards_played === n_players) {
     players[winner] += hand_points;
     current_player = winner;
+    setTurn();
+    setTrick();
     hand_points=0;
     cards_played = 0;
     last_card = {suit:'',value:0}
@@ -168,6 +219,7 @@ socket.on('card played', function(data){
     }
   } else {
     current_player = (current_player + 1) % n_players;
+    setTurn();
   }
   if(rounds === 0){
     alert('game over')
@@ -190,23 +242,32 @@ socket.on('too few players',function(){
 
 socket.on('begin game', function(game_data){
   console.log('begin game')
+  // Extracting useful information from signal
   player = game_data.player;
   hand = game_data.hand;
   n_players = Number(game_data.n_players);
   rounds = hand.length;
-  current_player = 0;
-  cards_played = 0;
   players = new Array(n_players).fill(0);
   passed = new Array(n_players).fill(0);
-
-  // Prepare the game play area
-  let play_area = document.getElementById('Play area');
-  let tally = document.getElementById('tally');
+  // Resetting defaults
+  last_card = {suit:'',value:0};
+  winner = -1;
+  hand_points = 0;
+  current_player = -1;
+  cards_played = 0;
+  passing_cards = [];
+  received_cards = [];
+  // Selecting key elements from the game play area
+  play_area = document.getElementById('Play area');
+  tally = document.getElementById('tally');
   hand_element = document.getElementById('hand');
+  // Set up the empty playing cards and the score table
   for (var i=0; i < n_players;i++){
+    // Only do it if they aren't there already
     if (!document.getElementById(i.toString())){
+      // Set up the cards
       player_spot = document.createElement('div');
-      player_spot.setAttribute('class','column');
+      player_spot.setAttribute('class','column is-narrow');
       player_card = document.createElement('img');
       player_card.id=i.toString();
       player_card.src='/static/cards/blank_of_blanks.svg';
@@ -214,6 +275,7 @@ socket.on('begin game', function(game_data){
       player_card.setAttribute('data-value','');
       player_spot.appendChild(player_card);
       play_area.appendChild(player_spot);
+      // Set up the score table
       player_score_row = document.createElement('tr');
       player_name_cell = document.createElement('td');
       player_name_data = document.createTextNode('Player ' + (i+1).toString());
@@ -229,8 +291,16 @@ socket.on('begin game', function(game_data){
       player_score_row.appendChild(player_score_cell);
       tally.appendChild(player_score_row);
     } else {
-      player_score_row = document.getElementById('tally_'+i.toString());
-      player_score_row.innerHTML = '0';
+      // If the table is there already, reset it
+      player_score_cell = document.getElementById('tally_'+i.toString());
+      player_score_cell.innerHTML = '0';
+      if (i==player){
+        console.log(player_score_row.childNodes[0])
+        player_score_cell.parentNode.childNodes[0].setAttribute('class',"is-selected");
+      } else{
+        player_score_cell.parentNode.childNodes[0].setAttribute('class',"");
+      };
+      // Wipe the card image
       player_card = document.getElementById(i.toString());
       player_card.src='/static/cards/blank_of_blanks.svg';
       player_card.setAttribute('data-suit','');
@@ -238,17 +308,19 @@ socket.on('begin game', function(game_data){
     }
   }
   // Remove the fourth card spot in a three player game
-  console.log('noboi');
   if (n_players === 3 && document.getElementById('3')){
-    console.log('yeboi');
     let fourth_card_slot = document.getElementById('3');
     fourth_card_slot.parentNode.remove();
   }
-  // Unhide the table if it is hidden
-  let table = document.getElementById('scoreboard');
-  if (table.getAttribute('class')=="table is-centred is-hidden"){
-    table.setAttribute('class',"table is-centred");
+  // Unhide the table and information panel if they are hidden
+  let table_col = document.getElementById('scoreboard');
+  if (table_col.getAttribute('class')=="column is-mobile is-centered is-hidden"){
+    table_col.setAttribute('class',"column is-mobile is-centered ");
   }
+  // Reset the information panel
+  setTurn();
+  setTrick();
+  setReceived();
   // Add a button to pass a card
   if (!document.getElementById('pass_button')){
     pass_button = document.createElement('button');
@@ -258,8 +330,8 @@ socket.on('begin game', function(game_data){
     pass_button.innerHTML='Pass Three Cards';
     play_area.appendChild(pass_button);
   }
-  // Prepare the hand
-  hand.sort(function(a,b){return(a.suit === b.suit ? (a.value > b.value ? 1 : -1) : (a.suit > b.suit ? 1 : -1))});
+  // Sort the cards
+  hand.sort(function(a,b){return(compare_cards(a,b))});
   // Clear any existing hand
   while (hand_element.firstChild) {
     hand_element.removeChild(hand_element.firstChild);
@@ -267,8 +339,11 @@ socket.on('begin game', function(game_data){
   // Put the new cards in the hand
   for (var i=0; i < hand.length;i++){
     card_col = document.createElement('div');
-    card_col.setAttribute('class','column content has-text-centered is-centered');
+    card_col.setAttribute('class','column has-text-centered is-centered is-narrow');
     card_img = document.createElement('img');
+    card_img.setAttribute('style','min-width:85px');
+    card_img.setAttribute('style','max-width:120px');
+    card_img.setAttribute('class','is-narrow');
     card_img.src = '/static/cards/' + getName(hand[i].value) + '_of_' + hand[i].suit + '.svg';
     card_img.id='card_'+i.toString();
     card_img.setAttribute('data-suit',hand[i].suit);
@@ -278,28 +353,3 @@ socket.on('begin game', function(game_data){
     hand_element.appendChild(card_col);
   }
 });
-/*
-window.addEventListener( "load", function () {
-  function sendData(formFields,username) {
-    const message = username + ': ' + formFields.next().value[1];
-    console.log(message)
-    socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:message});
-  }
-
-  // Access the form element...
-  const form = document.getElementById( "entry" );
-
-  // ...and take over its submit event.
-  form.addEventListener( "submit", function ( event ) {
-    event.preventDefault(event);
-    console.log('called')
-    const FD = new FormData( form );
-    const formFields = FD.entries();
-    const username = formFields.next().value[1];
-    console.log(username)
-    sendData(formFields,username);
-    form.reset();
-    document.getElementById('user').defaultValue = username;
-  } );
-} );
-*/
