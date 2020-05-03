@@ -162,11 +162,13 @@ socket.on('passed cards',function(data){
   if(passed.reduce((a, b) => a + b, 0) == n_players){
     hand = hand.concat(received_cards);
     // Sort the cards
+    console.log(hand);
     hand.sort(function(a,b){return(compare_cards(a,b))});
+    console.log(hand);
     // Display the new cards in the hand
     for (var i=0; i < hand.length;i++){
       card_img = document.getElementById('card_'+i.toString());
-      card_img.src = '/static/cards/' + getName(hand[i].value) + '_of_' + hand[i].suit + '.svg';
+      card_img.setAttribute('src', '/static/cards/' + getName(hand[i].value) + '_of_' + hand[i].suit + '.svg');
       card_img.setAttribute('data-suit',hand[i].suit);
       card_img.setAttribute('data-value',hand[i].value);
       card_img.setAttribute('onClick', 'playCard(this)');
@@ -268,7 +270,7 @@ socket.on('begin game', function(game_data){
   hand_element = document.getElementById('hand');
   // Set up the empty playing cards and the score table
   for (var i=0; i < n_players;i++){
-    // Only do it if they aren't there already
+    // Only add a card if it isn't there already
     if (!document.getElementById(i.toString())){
       // Set up the cards
       player_spot = document.createElement('div');
@@ -280,6 +282,9 @@ socket.on('begin game', function(game_data){
       player_card.setAttribute('data-value','');
       player_spot.appendChild(player_card);
       play_area.appendChild(player_spot);
+    }
+    // Only add a table row if it isn't there already
+    if(!document.getElementById('tally_'+i.toString())){
       // Set up the score table
       player_score_row = document.createElement('tr');
       player_name_cell = document.createElement('td');
