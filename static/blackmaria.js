@@ -154,7 +154,11 @@ function passCards(elem){
 }
 
 socket.on('receive cards', function(data){
-  received_cards = data.passing_cards;
+  let next_card;
+  for (var i=0;i < data.passing_cards.length;i++){
+    next_card = {'suit':data.passing_cards[i].suit,'value':Number(data.passing_cards[i].value)};
+    received_cards.push(next_card);
+  }
 });
 
 socket.on('passed cards',function(data){
