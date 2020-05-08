@@ -4,12 +4,14 @@ let suitEmoji = {'clubs':'♣️','hearts':'♥️','diamonds':'♦️','spades'
 let last_card = {suit:'',value:0};
 let winner = -1;
 let hand_points = 0;
+let hand_penalties = [];
 let players = [];
 let rounds = 0;
 let player = -1;
 let current_player = -1;
 let cards_played = 0;
 let hand = [];
+let penalty_points = [];
 let passing_cards = [];
 let hand_element;
 let passed = [];
@@ -153,6 +155,20 @@ function passCards(elem){
   }
 }
 
+function setPenalties(){
+  let penalty_cell = document.getElementById('penalty_'+winner.toString());
+  console.log('penalty_'+winner.toString());
+  let penalty_data = '';
+  penalty_points[winner] = penalty_points[winner].concat(hand_penalties);
+  console.log(penalty_points);
+  penalty_points[winner].sort(function(a,b){compare_cards(a,b)});
+  for (var i =0; i < penalty_points[winner].length;i++){
+    penalty_data += penalty_points[winner][i].value.toString() + suitEmoji[penalty_points[winner][i].suit] + ', ';
+  }
+  penalty_data =  penalty_data.slice(0, -2); //Remove trailing comma and space
+  penalty_cell.innerHTML = penalty_data;
+}
+
 socket.on('receive cards', function(data){
   let next_card;
   for (var i=0;i < data.passing_cards.length;i++){
@@ -186,25 +202,34 @@ socket.on('passed cards',function(data){
 
 socket.on('card played', function(data){
   cards_played += 1;
+  // Blank all of the cards if this is a new trick
   if (last_card.suit===''){
     for(var i=0;i<n_players;i++){
       document.getElementById(i.toString()).src = '/static/cards/blank_of_blanks.svg';
     };
   }
+  // Render this card
   document.getElementById(data.player).src = '/static/cards/' + getName(data.value) + '_of_' + data.suit + '.svg';
+  // Update who is winning the trick
   if(last_card.suit==='' || ( data.suit == last_card.suit && Number(data.value) > Number(last_card.value) ) ){
     last_card.suit = data.suit;
     last_card.value = data.value;
     winner=data.player;
   };
+  // Update how many points this trick is worth and which cards are in it
   if(data.suit === 'hearts' || ( data.suit==='spades' && data.value==='12' ) ) {
     hand_points += getPoints(data.value,data.suit);
+    hand_penalties.push({suit:data.suit,value:Number(data.value)});
+    console.log(hand_penalties);
   };
+  // Handle the end of the trick
   if(cards_played === n_players) {
     players[winner] += hand_points;
     current_player = winner;
     setTurn();
     setTrick();
+    setPenalties();
+    hand_penalties = [];
     hand_points=0;
     cards_played = 0;
     last_card = {suit:'',value:0}
@@ -231,7 +256,6 @@ socket.on('card played', function(data){
   if(rounds === 0){
     alert('Game Over!')
   }
-
 });
 
 socket.on('connect', function() {
@@ -256,10 +280,12 @@ socket.on('begin game', function(game_data){
   rounds = hand.length;
   players = new Array(n_players).fill(0);
   passed = new Array(n_players).fill(0);
+  penalty_points = new Array(n_players).fill([]);
   // Resetting defaults
   last_card = {suit:'',value:0};
   winner = -1;
   hand_points = 0;
+  hand_penalties = [];
   current_player = -1;
   cards_played = 0;
   passing_cards = [];
@@ -291,23 +317,34 @@ socket.on('begin game', function(game_data){
     if(!document.getElementById('tally_'+i.toString())){
       // Set up the score table
       player_score_row = document.createElement('tr');
+      // Built player name cell
       player_name_cell = document.createElement('td');
       player_name_data = document.createTextNode('Player ' + (i+1).toString());
       if (i==player){
         player_name_cell.setAttribute('class',"is-selected");
       };
       player_name_cell.appendChild(player_name_data);
+      // Build player score cell
       player_score_cell = document.createElement('td');
       player_score_cell.id = 'tally_'+i.toString();
       player_score_data = document.createTextNode('0');
       player_score_cell.appendChild(player_score_data);
+      // Build player penalty point cell
+      player_pen_cell = document.createElement('td');
+      player_pen_cell.id = 'penalty_'+i.toString();
+      player_pen_data = document.createTextNode(' ');
+      player_pen_cell.appendChild(player_pen_data);
+      // Build score row
       player_score_row.appendChild(player_name_cell);
       player_score_row.appendChild(player_score_cell);
+      player_score_row.appendChild(player_pen_cell);
       tally.appendChild(player_score_row);
     } else {
       // If the table is there already, reset it
       player_score_cell = document.getElementById('tally_'+i.toString());
       player_score_cell.innerHTML = '0';
+      player_pen_cell = document.getElementById('penalty_'+i.toString());
+      player_pen_cell.innerHTML = ' ';
       if (i==player){
         player_score_cell.parentNode.childNodes[0].setAttribute('class',"is-selected");
       } else{
