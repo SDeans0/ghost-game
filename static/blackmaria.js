@@ -29,6 +29,15 @@ function getName(cardValue){
     }
 }
 
+function getShortName(cardValue){
+    if (cardValue < 11){
+      return(cardValue.toString());
+    } else {
+      let pictures = ['J','Q','K','A'];
+      return(pictures[cardValue-11]);
+    }
+}
+
 function getPoints(value,suit){
   if(suit === 'spades') {
     return(50);
@@ -159,11 +168,11 @@ function setPenalties(){
   let penalty_cell = document.getElementById('penalty_'+winner.toString());
   console.log('penalty_'+winner.toString());
   let penalty_data = '';
-  penalty_points[winner] = penalty_points[winner].concat(hand_penalties);
-  console.log(penalty_points);
-  penalty_points[winner].sort(function(a,b){compare_cards(a,b)});
+  let winner_penalties = penalty_points[winner].concat(hand_penalties);
+  winner_penalties.sort(function(a,b){return(compare_cards(a,b))});
+  penalty_points[winner] = winner_penalties;
   for (var i =0; i < penalty_points[winner].length;i++){
-    penalty_data += penalty_points[winner][i].value.toString() + suitEmoji[penalty_points[winner][i].suit] + ', ';
+    penalty_data += getShortName(penalty_points[winner][i].value) + suitEmoji[penalty_points[winner][i].suit] + ', ';
   }
   penalty_data =  penalty_data.slice(0, -2); //Remove trailing comma and space
   penalty_cell.innerHTML = penalty_data;
@@ -319,7 +328,7 @@ socket.on('begin game', function(game_data){
       player_score_row = document.createElement('tr');
       // Built player name cell
       player_name_cell = document.createElement('td');
-      player_name_data = document.createTextNode('Player ' + (i+1).toString());
+      player_name_data = document.createTextNode('P' + (i+1).toString());
       if (i==player){
         player_name_cell.setAttribute('class',"is-selected");
       };
