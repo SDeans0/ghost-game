@@ -50,10 +50,10 @@ function getPoints(value,suit){
 
 function compare_cards(a,b){
   if (a.suit===b.suit){
-    return(a.value > b.value);
+    return a.value > b.value ? 1 : -1 ;
   } else {
     let suits = ['clubs','diamonds','spades','hearts'];
-    return suits.indexOf(a.suit) > suits.indexOf(b.suit);
+    return suits.indexOf(a.suit) > suits.indexOf(b.suit) ? 1 : -1 ;
   }
 }
 
