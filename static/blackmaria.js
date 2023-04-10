@@ -419,3 +419,8 @@ socket.on('begin game', function(game_data){
     hand_element.appendChild(card_col);
   }
 });
+
+window.addEventListener('beforeunload', function(event) {
+  socket.emit('disconnect')
+  return null;
+}, false);

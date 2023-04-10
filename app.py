@@ -5,12 +5,14 @@ import flask_sqlalchemy as sql
 import random, string
 import words
 import time
+import logging
+
+logger = logging.getLogger()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://uahbbqqegyqwia:5c2f30f0fdc02a2ecb1bb18543596e67768d8939c6e038477b8dc022175dfa2d@ec2-54-247-125-38.eu-west-1.compute.amazonaws.com:5432/dd1tki6p691uk7'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/NomadSam/Desktop/GitHub/ghost-game/test.db'
 socketio = SocketIO(app)
 db = sql.SQLAlchemy(app)
 
@@ -141,6 +143,7 @@ def connect():
 @socketio.on('disconnect',namespace='/ranwords')
 @socketio.on('disconnect',namespace='/ghost')
 def disconnect():
+    logger.log(1, f"Player disconnected: {request.sid}")
     player = User.query.filter_by(sid=request.sid).first()
     if player is not None:
         db.session.delete(player)
