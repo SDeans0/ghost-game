@@ -1,4 +1,14 @@
-# ghost-game
-Three simple games to play over zoom, hosted on [heroku](https://gheoghst-game.herokuapp.com).
+# Install
 
-Bug reports and feature requests welcome.
+```
+conda create -n 'cards' python=3.9
+conda activate cards
+conda install flask
+pip install -r requirements.txt
+```
+
+# Run
+
+```
+python app.py
+```
