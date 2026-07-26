@@ -14,6 +14,8 @@ export SECRET_KEY="change-me-in-production"
 # export DATABASE_URL="sqlite:///app.db"
 ```
 
+`SECRET_KEY` is required and app startup will fail if it is unset.
+
 # Database setup
 
 ```bash
@@ -30,4 +32,10 @@ flask --app app run --host 0.0.0.0 --port 8000
 
 ```bash
 ./run.sh
+```
+
+# Run tests
+
+```bash
+pytest
 ```

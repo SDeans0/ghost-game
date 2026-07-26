@@ -1,38 +1,59 @@
 import json
 import random
-import string
 from typing import Any
 from uuid import uuid4
 
 from flask import abort
+from sqlalchemy.exc import IntegrityError
 
 import words
 from ghost_game.extensions import db
+from ghost_game.game_types import GameType
 from ghost_game.models import Player, Room, RoomEvent
 
-SUPPORTED_GAMES = {"ghost", "ranwords", "blackmaria"}
-MAX_ROOM_NAME_RETRIES = 100
+MAX_ROOM_NAME_RETRIES = 5
+ROOM_ADJECTIVES = (
+    "amber",
+    "brisk",
+    "calm",
+    "frozen",
+    "rapid",
+    "tempered",
+    "vivid",
+)
+ROOM_SIZES = (
+    "mini",
+    "micro",
+    "small",
+    "medium",
+    "tall",
+    "wide",
+)
+ROOM_NOUNS = (
+    "anchor",
+    "delta",
+    "harbor",
+    "lantern",
+    "rocket",
+    "solder",
+    "thunder",
+)
 
 
 def _random_room_name() -> str:
-    return "".join(random.choice(string.ascii_lowercase) for _ in range(4))
+    return f"{random.choice(ROOM_ADJECTIVES)}-{random.choice(ROOM_SIZES)}-{random.choice(ROOM_NOUNS)}"
 
 
-def _next_room_name() -> str:
+def create_room(game: GameType) -> Room:
     for _ in range(MAX_ROOM_NAME_RETRIES):
-        candidate = _random_room_name()
-        if Room.query.filter_by(name=candidate).first() is None:
-            return candidate
-    raise RuntimeError("Could not allocate a room name")
-
-
-def create_room(game: str) -> Room:
-    if game not in SUPPORTED_GAMES:
-        abort(400, "Unsupported game")
-    room = Room(name=_next_room_name(), game=game, state="{}")
-    db.session.add(room)
-    db.session.commit()
-    return room
+        room = Room(name=_random_room_name(), game=game.value, state="{}")
+        db.session.add(room)
+        try:
+            db.session.commit()
+            return room
+        except IntegrityError:
+            db.session.rollback()
+    raise RuntimeError("Could not allocate a unique room name")
 
 
 def get_room_or_404(room_name: str) -> Room:

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from flask import Flask
 
-from .config import Config
+from .config import load_config
 from .extensions import db, migrate
 from .routes.api import api_bp
 from .routes.pages import pages_bp
@@ -17,7 +17,7 @@ def create_app() -> Flask:
         template_folder=str(BASE_DIR / "templates"),
         static_folder=str(BASE_DIR / "static"),
     )
-    app.config.from_object(Config)
+    app.config.from_mapping(load_config().as_flask_mapping())
 
     db.init_app(app)
     migrate.init_app(app, db)
