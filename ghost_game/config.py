@@ -2,13 +2,13 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-import words
+from ghost_game.words import words as repo_words
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "app.db"
-DEFAULT_ROOM_NAME_WORDS = tuple(words.words)
-DEFAULT_GAME_WORDS = tuple(words.words)
+DEFAULT_ROOM_NAME_WORDS = tuple(repo_words)
+DEFAULT_GAME_WORDS = tuple(repo_words)
 
 
 @dataclass(frozen=True)
