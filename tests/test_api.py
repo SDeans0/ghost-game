@@ -75,7 +75,8 @@ def test_start_ranwords_uses_configured_game_words(client):
         assert start_response.status_code == 200
         events_response = client.get(f"/api/rooms/{room_name}/events?since_id=0")
         events = events_response.get_json()["events"]
-        word_event = next(event for event in events if event["type"] == "word")
+        word_event = next((event for event in events if event["type"] == "word"), None)
+        assert word_event is not None
         assert word_event["payload"]["word"] == "customword"
     finally:
         client.application.config["GAME_WORDS"] = original_game_words
