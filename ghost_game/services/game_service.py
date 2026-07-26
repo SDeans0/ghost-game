@@ -41,6 +41,13 @@ def get_room_or_404(room_name: str) -> Room:
     return room
 
 
+def ensure_player_in_room(room_name: str, player_token: str) -> Player:
+    player = Player.query.filter_by(room_name=room_name, token=player_token).first()
+    if player is None:
+        abort(403, "Invalid player token for this room")
+    return player
+
+
 def get_or_create_player(room: Room, player_token: str | None = None) -> Player:
     if player_token:
         existing = Player.query.filter_by(token=player_token, room_name=room.name).first()
@@ -75,7 +82,7 @@ def poll_events(room_name: str, since_id: int, player_token: str | None = None) 
     else:
         query = query.filter(RoomEvent.recipient_token.is_(None))
 
-    events = query.order_by(RoomEvent.id.asc()).limit(200).all()
+    events = query.order_by(RoomEvent.id.asc()).all()
     return [
         {
             "id": event.id,

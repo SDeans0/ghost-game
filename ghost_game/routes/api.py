@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, url_for
 
 from ghost_game.services.game_service import (
     create_room,
+    ensure_player_in_room,
     get_or_create_player,
     get_room_or_404,
     poll_events,
@@ -56,6 +57,10 @@ def poll_room_events(room: str):
 def start_room_game(room: str):
     room_obj = get_room_or_404(room)
     data = request.get_json(silent=True) or {}
+    player_token = data.get("player_token")
+
+    if player_token:
+        ensure_player_in_room(room_obj.name, player_token)
 
     if room_obj.game == "ghost":
         start_ghost_game(room_obj)
@@ -73,6 +78,12 @@ def room_actions(room: str):
     data = request.get_json(silent=True) or {}
     action = data.get("action")
     payload = data.get("payload", {})
+    player_token = data.get("player_token")
+
+    if not player_token:
+        return jsonify({"error": "player_token is required"}), 400
+
+    ensure_player_in_room(room_obj.name, player_token)
 
     if room_obj.game == "ranwords" and action == "message":
         submit_ranwords_message(room_obj, payload.get("msg", ""))

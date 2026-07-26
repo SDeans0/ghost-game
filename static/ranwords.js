@@ -63,7 +63,8 @@ window.addEventListener('load', async function () {
 
     await postJson(`/api/rooms/${room}/actions`, {
       action: 'message',
-      payload: { msg: message, player_token: playerToken }
+      player_token: playerToken,
+      payload: { msg: message }
     });
 
     form.reset();

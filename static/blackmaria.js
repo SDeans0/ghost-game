@@ -125,7 +125,8 @@ async function playCard(elem){
     hand = hand.filter(card => !(card.suit==elem.dataset.suit && card.value==elem.dataset.value));
     await postJson(`/api/rooms/${room}/actions`, {
       action: 'card_played',
-      payload: {room: room,suit:elem.dataset.suit,value:elem.dataset.value,player:player,player_token: playerToken}
+      player_token: playerToken,
+      payload: {suit:elem.dataset.suit,value:elem.dataset.value,player:player}
     });
     elem.parentNode.remove()
   }
@@ -174,7 +175,8 @@ async function passCards(elem){
   if (passing_cards.length === 3){
     await postJson(`/api/rooms/${room}/actions`, {
       action: 'pass_cards',
-      payload: {cards:passing_cards,player:player,room:room,n_players:n_players,player_token: playerToken}
+      player_token: playerToken,
+      payload: {cards:passing_cards,player:player,n_players:n_players}
     });
     passed[player] = 1;
     passing_cards = [];
@@ -406,6 +408,7 @@ function handleBeginGame(game_data){
 async function poll() {
   const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}&player_token=${playerToken}`);
   if (!response.ok) {
+    console.error('Polling failed', response.status);
     return;
   }
 
