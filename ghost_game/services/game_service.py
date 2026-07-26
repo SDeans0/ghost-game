@@ -285,11 +285,13 @@ def submit_blackmaria_pass_cards(room: Room, payload: dict[str, Any]) -> None:
     try:
         sender = int(payload.get("player", -1))
     except (TypeError, ValueError):
-        abort(400, "Game has not started")
+        abort(400, "Invalid player index")
 
     n_players = int(state.get("n_players", 0))
-    if not players or n_players <= 0 or len(players) != n_players or sender < 0 or sender >= n_players:
+    if not players or n_players <= 0 or len(players) != n_players:
         abort(400, "Game has not started")
+    if sender < 0 or sender >= n_players:
+        abort(400, "Invalid player index")
 
     receiver = (sender + 1) % n_players
     receiver_token = players[receiver]

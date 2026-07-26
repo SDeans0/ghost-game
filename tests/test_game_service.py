@@ -11,7 +11,11 @@ from ghost_game.services.game_service import save_room_state, submit_blackmaria_
 
 def _seed_blackmaria_room() -> Room:
     room = Room(name="test-blackmaria-room", game=GameType.BLACKMARIA.value, state="{}")
-    players = [Player(token="token-a", room_name=room.name), Player(token="token-b", room_name=room.name), Player(token="token-c", room_name=room.name)]
+    players = [
+        Player(token="token-a", room_name=room.name),
+        Player(token="token-b", room_name=room.name),
+        Player(token="token-c", room_name=room.name),
+    ]
     db.session.add(room)
     db.session.add_all(players)
     db.session.commit()
