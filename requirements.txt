@@ -1,8 +1,6 @@
-bidict==0.22.1
-Flask-SocketIO==5.3.3
-Flask-SQLAlchemy==3.0.3
-greenlet==2.0.2
-python-engineio==4.4.0
-python-socketio==5.8.0
-SQLAlchemy==2.0.9
-typing_extensions==4.5.0
+Flask==3.0.3
+Flask-Migrate==4.0.7
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.31
+alembic==1.13.2
+gunicorn==22.0.0

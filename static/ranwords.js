@@ -1,55 +1,72 @@
-var socket = io('/ranwords');
+let room;
+let playerToken;
+let sinceId = 0;
 
-socket.on('connect', function() {
-  socket.emit('joinGame',{url: window.location.href});
-});
+async function postJson(url, body) {
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
 
-socket.on('joined room', function(msg){
-  window.sessionStorage.setItem('room',msg.room);
-  console.log('joined room');
-})
+function storageKey() {
+  return `player_token_ranwords_${room}`;
+}
 
-socket.on('word', function(msg){
-  document.getElementById("word_placeholder").innerHTML = msg.word;
-  document.getElementById("scratchpad").value = '';
-})
+async function joinRoom() {
+  room = window.location.pathname.split('/').pop();
+  const cachedToken = window.localStorage.getItem(storageKey());
+  const response = await postJson(`/api/rooms/${room}/join`, { player_token: cachedToken });
+  const data = await response.json();
+  playerToken = data.player_token;
+  window.localStorage.setItem(storageKey(), playerToken);
+}
 
-
-socket.on('begin game', function(msg){
-  alert('The game has started');
-})
-
-
-socket.on('message', function(msg){
-  document.getElementById("scratchpad").value += msg.msg + '\n';
-})
-
-function start(){
-  socket.emit('start',{room: window.sessionStorage.getItem('room')});
-  console.log('start');
-};
-
-// Form handling code
-window.addEventListener( "load", function () {
-  function sendData(formFields,username) {
-    const message = username + ': ' + formFields.next().value[1];
-    //console.log(message)
-    socket.emit('message',{room: window.sessionStorage.getItem('room'),msg:message});
+async function poll() {
+  const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}&player_token=${playerToken}`);
+  if (!response.ok) {
+    return;
   }
 
-  // Access the form element...
-  const form = document.getElementById( "entry" );
+  const data = await response.json();
+  data.events.forEach((event) => {
+    sinceId = Math.max(sinceId, event.id);
+    if (event.type === 'word') {
+      document.getElementById('word_placeholder').innerHTML = event.payload.word;
+      document.getElementById('scratchpad').value = '';
+    }
+    if (event.type === 'begin_game') {
+      alert('The game has started');
+    }
+    if (event.type === 'message') {
+      document.getElementById('scratchpad').value += event.payload.msg + '\n';
+    }
+  });
+}
 
-  // ...and take over its submit event.
-  form.addEventListener( "submit", function ( event ) {
+async function start() {
+  await postJson(`/api/rooms/${room}/start`, { player_token: playerToken });
+}
+
+window.addEventListener('load', async function () {
+  await joinRoom();
+  setInterval(poll, 1000);
+
+  const form = document.getElementById('entry');
+  form.addEventListener('submit', async function (event) {
     event.preventDefault(event);
-    //console.log('called')
-    const FD = new FormData( form );
+    const FD = new FormData(form);
     const formFields = FD.entries();
     const username = formFields.next().value[1];
-    //console.log(username)
-    sendData(formFields,username);
+    const message = username + ': ' + formFields.next().value[1];
+
+    await postJson(`/api/rooms/${room}/actions`, {
+      action: 'message',
+      payload: { msg: message, player_token: playerToken }
+    });
+
     form.reset();
     document.getElementById('user').defaultValue = username;
-  } );
-} );
+  });
+});

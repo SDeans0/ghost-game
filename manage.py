@@ -1,13 +1,16 @@
-from flask_script import Manager
-from flask_migrate import Migrate, MigrateCommand
-
-from app import app, db
-
-migrate = Migrate(app, db)
-
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
+from ghost_game import create_app
+from ghost_game.extensions import db
+from ghost_game.models import Player, Room, RoomEvent
 
 
-if __name__ == '__main__':
-    manager.run()
+app = create_app()
+
+
+@app.shell_context_processor
+def shell_context():
+    return {
+        "db": db,
+        "Room": Room,
+        "Player": Player,
+        "RoomEvent": RoomEvent,
+    }

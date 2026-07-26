@@ -1,14 +1,33 @@
 # Install
 
-```
-conda create -n 'cards' python=3.9
-conda activate cards
-conda install flask
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-# Run
+# Configure
 
+```bash
+export SECRET_KEY="change-me-in-production"
+# Optional, defaults to sqlite:///test.db
+# export DATABASE_URL="sqlite:///test.db"
 ```
-python app.py
+
+# Database setup
+
+```bash
+flask --app app db upgrade
+```
+
+# Run (development)
+
+```bash
+flask --app app run --host 0.0.0.0 --port 8000
+```
+
+# Run (production)
+
+```bash
+./run.sh
 ```
