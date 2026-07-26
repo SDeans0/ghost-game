@@ -22,6 +22,6 @@ def test_load_config_rejects_non_positive_retry_count():
         load_config({"SECRET_KEY": "abc", "ROOM_NAME_RETRIES": "0"})
 
 
-def test_load_config_ignore_room_name_words_environment_override():
+def test_load_config_ignores_room_name_words_environment_override():
     config = load_config({"SECRET_KEY": "abc", "ROOM_NAME_WORDS": "temperate,mini,solder"})
     assert config.room_name_words == DEFAULT_ROOM_NAME_WORDS
