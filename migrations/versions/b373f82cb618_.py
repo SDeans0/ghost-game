@@ -46,7 +46,7 @@ def upgrade():
             if not _has_column(inspector, 'room', 'state'):
                 batch_op.add_column(sa.Column('state', sa.Text(), nullable=False, server_default='{}'))
             if not _has_column(inspector, 'room', 'created_at'):
-                batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=False, server_default='1970-01-01 00:00:00'))
+                batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')))
 
     if inspector.has_table('user') and not inspector.has_table('player'):
         op.rename_table('user', 'player')
@@ -69,7 +69,7 @@ def upgrade():
             if _has_column(inspector, 'player', 'sid') and not _has_column(inspector, 'player', 'token'):
                 batch_op.alter_column('sid', new_column_name='token')
             if not _has_column(inspector, 'player', 'created_at'):
-                batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=False, server_default='1970-01-01 00:00:00'))
+                batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')))
 
     inspector = sa.inspect(bind)
     if not _has_index(inspector, 'player', 'ix_player_token'):

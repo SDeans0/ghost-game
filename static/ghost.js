@@ -26,6 +26,7 @@ async function joinRoom() {
 async function poll() {
   const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}`, { headers: { 'X-Player-Token': playerToken } });
   if (!response.ok) {
+    console.error('Polling failed', response.status);
     return;
   }
 
