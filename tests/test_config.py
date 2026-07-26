@@ -1,6 +1,6 @@
 import pytest
 
-from ghost_game.config import DEFAULT_ROOM_NAME_WORDS, load_config
+from ghost_game.config import DEFAULT_GAME_WORDS, DEFAULT_ROOM_NAME_WORDS, load_config
 
 
 def test_load_config_requires_secret_key():
@@ -14,7 +14,7 @@ def test_load_config_uses_provided_values():
     assert config.sqlalchemy_database_uri == "sqlite:///custom.db"
     assert config.room_name_retries == 25
     assert len(config.room_name_words) >= 3
-    assert len(config.game_words) >= 1
+    assert config.game_words == DEFAULT_GAME_WORDS
 
 
 def test_load_config_rejects_non_positive_retry_count():
