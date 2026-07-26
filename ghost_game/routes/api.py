@@ -18,7 +18,7 @@ from ghost_game.services.game_service import (
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 
-def _parse_game(game_value: str | None) -> GameType | None:
+def _parse_game_type(game_value: str | None) -> GameType | None:
     if not game_value:
         return None
     try:
@@ -30,7 +30,7 @@ def _parse_game(game_value: str | None) -> GameType | None:
 @api_bp.post("/rooms")
 def create_room_route():
     data = request.get_json(silent=True) or {}
-    game = _parse_game(data.get("game"))
+    game = _parse_game_type(data.get("game"))
     if game is None:
         return jsonify({"error": "Unsupported game"}), 400
     try:
@@ -77,7 +77,7 @@ def start_room_game(room: str):
     if player_token:
         ensure_player_in_room(room_obj.name, player_token)
 
-    game = _parse_game(room_obj.game)
+    game = _parse_game_type(room_obj.game)
     if game is None:
         return jsonify({"error": "Unsupported game"}), 400
 
@@ -104,7 +104,7 @@ def room_actions(room: str):
 
     ensure_player_in_room(room_obj.name, player_token)
 
-    game = _parse_game(room_obj.game)
+    game = _parse_game_type(room_obj.game)
     if game is None:
         return jsonify({"error": "Unsupported game"}), 400
 

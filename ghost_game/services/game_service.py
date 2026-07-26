@@ -11,37 +11,12 @@ from ghost_game.extensions import db
 from ghost_game.game_types import GameType
 from ghost_game.models import Player, Room, RoomEvent
 
-MAX_ROOM_NAME_RETRIES = 5
-ROOM_ADJECTIVES = (
-    "amber",
-    "brisk",
-    "calm",
-    "frozen",
-    "rapid",
-    "tempered",
-    "vivid",
-)
-ROOM_SIZES = (
-    "mini",
-    "micro",
-    "small",
-    "medium",
-    "tall",
-    "wide",
-)
-ROOM_NOUNS = (
-    "anchor",
-    "delta",
-    "harbor",
-    "lantern",
-    "rocket",
-    "solder",
-    "thunder",
-)
+MAX_ROOM_NAME_RETRIES = 100
 
 
 def _random_room_name() -> str:
-    return f"{random.choice(ROOM_ADJECTIVES)}-{random.choice(ROOM_SIZES)}-{random.choice(ROOM_NOUNS)}"
+    first, second, third = random.sample(words.words, 3)
+    return f"{first.lower()}-{second.lower()}-{third.lower()}"
 
 
 def create_room(game: GameType) -> Room:
