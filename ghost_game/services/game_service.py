@@ -33,8 +33,8 @@ def create_room(game: GameType) -> Room:
     Raises:
         RuntimeError: If a unique room name cannot be allocated.
     """
-    max_room_name_retries = int(current_app.config["ROOM_NAME_RETRIES"])
-    for _ in range(max_room_name_retries):
+    room_name_retries: int = current_app.config["ROOM_NAME_RETRIES"]
+    for _ in range(room_name_retries):
         room = Room(name=_random_room_name(), game=game.value, state="{}")
         db.session.add(room)
         try:
