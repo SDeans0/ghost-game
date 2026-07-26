@@ -25,7 +25,7 @@ def _parse_game_type(game_value: str | None) -> GameType | None:
         game_value: Raw game identifier from a request payload.
 
     Returns:
-        GameType | None: Parsed enum value, or ``None`` if invalid.
+        GameType: Parsed enum value, or ``None`` if invalid.
     """
     if not game_value:
         return None
