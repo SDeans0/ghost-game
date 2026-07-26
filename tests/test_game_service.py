@@ -23,7 +23,7 @@ def _seed_blackmaria_room() -> Room:
     return room
 
 
-def test_submit_blackmaria_pass_cards_uses_server_state_player_count(app):
+def test_submit_blackmaria_pass_cards_ignores_client_player_count(app):
     with app.app_context():
         room = _seed_blackmaria_room()
         submit_blackmaria_pass_cards(
@@ -42,7 +42,7 @@ def test_submit_blackmaria_pass_cards_uses_server_state_player_count(app):
         assert json.loads(passed_event.payload) == {"sender": 2}
 
 
-def test_submit_blackmaria_pass_cards_rejects_sender_out_of_range(app):
+def test_submit_blackmaria_pass_cards_rejects_invalid_sender_index(app):
     with app.app_context():
         room = _seed_blackmaria_room()
         with pytest.raises(HTTPException) as exc_info:
