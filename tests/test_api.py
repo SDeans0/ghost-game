@@ -63,3 +63,19 @@ def test_start_route_validates_token_membership(client):
 
     response = client.post(f"/api/rooms/{room_name}/start", json={"player_token": "token-2"})
     assert response.status_code == 403
+
+
+def test_start_ranwords_uses_configured_game_words(client):
+    create_response = client.post("/api/rooms", json={"game": GameType.RANWORDS.value})
+    room_name = create_response.get_json()["room"]
+    original_game_words = client.application.config["GAME_WORDS"]
+    client.application.config["GAME_WORDS"] = ("customword",)
+    try:
+        start_response = client.post(f"/api/rooms/{room_name}/start", json={})
+        assert start_response.status_code == 200
+        events_response = client.get(f"/api/rooms/{room_name}/events?since_id=0")
+        events = events_response.get_json()["events"]
+        word_event = next(event for event in events if event["type"] == "word")
+        assert word_event["payload"]["word"] == "customword"
+    finally:
+        client.application.config["GAME_WORDS"] = original_game_words

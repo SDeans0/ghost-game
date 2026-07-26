@@ -19,6 +19,14 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 
 def _parse_game_type(game_value: str | None) -> GameType | None:
+    """Parse a raw game identifier to the corresponding enum value.
+
+    Args:
+        game_value: Raw game identifier from a request payload.
+
+    Returns:
+        GameType | None: Parsed enum value, or ``None`` if invalid.
+    """
     if not game_value:
         return None
     try:
@@ -29,6 +37,7 @@ def _parse_game_type(game_value: str | None) -> GameType | None:
 
 @api_bp.post("/rooms")
 def create_room_route():
+    """Create a room for a supported game type."""
     data = request.get_json(silent=True) or {}
     game = _parse_game_type(data.get("game"))
     if game is None:
@@ -49,6 +58,11 @@ def create_room_route():
 
 @api_bp.post("/rooms/<room>/join")
 def join_room_route(room: str):
+    """Join an existing room and return a player token.
+
+    Args:
+        room: Room identifier.
+    """
     room_obj = get_room_or_404(room)
     data = request.get_json(silent=True) or {}
     player = get_or_create_player(room_obj, data.get("player_token"))
@@ -57,6 +71,11 @@ def join_room_route(room: str):
 
 @api_bp.get("/rooms/<room>/events")
 def poll_room_events(room: str):
+    """Poll room events after a cursor.
+
+    Args:
+        room: Room identifier.
+    """
     get_room_or_404(room)
     try:
         since_id = int(request.args.get("since_id", default="0"))
@@ -70,6 +89,11 @@ def poll_room_events(room: str):
 
 @api_bp.post("/rooms/<room>/start")
 def start_room_game(room: str):
+    """Start the selected room's game.
+
+    Args:
+        room: Room identifier.
+    """
     room_obj = get_room_or_404(room)
     data = request.get_json(silent=True) or {}
     player_token = data.get("player_token")
@@ -93,6 +117,11 @@ def start_room_game(room: str):
 
 @api_bp.post("/rooms/<room>/actions")
 def room_actions(room: str):
+    """Submit an in-game action for the room.
+
+    Args:
+        room: Room identifier.
+    """
     room_obj = get_room_or_404(room)
     data = request.get_json(silent=True) or {}
     action = data.get("action")

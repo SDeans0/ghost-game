@@ -12,6 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def create_app() -> Flask:
+    """Create and configure the Flask application instance.
+
+    Returns:
+        Flask: Configured application with extensions and blueprints.
+    """
     app = Flask(
         __name__,
         template_folder=str(BASE_DIR / "templates"),

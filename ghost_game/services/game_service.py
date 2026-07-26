@@ -6,7 +6,6 @@ from uuid import uuid4
 from flask import abort, current_app
 from sqlalchemy.exc import IntegrityError
 
-import words
 from ghost_game.extensions import db
 from ghost_game.game_types import GameType
 from ghost_game.models import Player, Room, RoomEvent
@@ -195,7 +194,7 @@ def start_ghost_game(room: Room) -> None:
     shuffled = players[:]
     random.shuffle(shuffled)
     ghost = shuffled.pop()
-    word = random.choice(words.words)
+    word = random.choice(current_app.config["GAME_WORDS"])
 
     for player in shuffled:
         emit_event(room.name, "word", {"word": word}, recipient_token=player.token)
@@ -209,7 +208,7 @@ def start_ranwords_game(room: Room) -> None:
     Args:
         room: Room to initialize.
     """
-    word = random.choice(words.words)
+    word = random.choice(current_app.config["GAME_WORDS"])
     emit_event(room.name, "word", {"word": word})
     emit_event(room.name, "begin_game", {"message": "Begin the game"})
 
