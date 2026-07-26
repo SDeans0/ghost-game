@@ -43,20 +43,11 @@ def load_config(environ: dict[str, str] | None = None) -> AppConfig:
     room_name_retries = int(source.get("ROOM_NAME_RETRIES", "100"))
     if room_name_retries < 1:
         raise RuntimeError("ROOM_NAME_RETRIES must be a positive integer")
-    configured_room_name_words = source.get("ROOM_NAME_WORDS", "").split(",")
-    room_name_words = tuple(
-        stripped_word
-        for stripped_word in (word.strip() for word in configured_room_name_words)
-        if stripped_word
-    )
-    if not room_name_words:
-        room_name_words = DEFAULT_ROOM_NAME_WORDS
-    if len(room_name_words) < 3:
-        raise RuntimeError("ROOM_NAME_WORDS must contain at least 3 words")
 
     return AppConfig(
         secret_key=secret_key,
         sqlalchemy_database_uri=database_url,
         room_name_retries=room_name_retries,
-        room_name_words=room_name_words,
+        room_name_words=DEFAULT_ROOM_NAME_WORDS,
+        game_words=DEFAULT_GAME_WORDS,
     )

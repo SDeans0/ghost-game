@@ -1,6 +1,6 @@
 import pytest
 
-from ghost_game.config import load_config
+from ghost_game.config import DEFAULT_ROOM_NAME_WORDS, load_config
 
 
 def test_load_config_requires_secret_key():
@@ -13,6 +13,8 @@ def test_load_config_uses_provided_values():
     assert config.secret_key == "abc"
     assert config.sqlalchemy_database_uri == "sqlite:///custom.db"
     assert config.room_name_retries == 25
+    assert len(config.room_name_words) >= 3
+    assert len(config.game_words) >= 1
 
 
 def test_load_config_rejects_non_positive_retry_count():
@@ -20,11 +22,6 @@ def test_load_config_rejects_non_positive_retry_count():
         load_config({"SECRET_KEY": "abc", "ROOM_NAME_RETRIES": "0"})
 
 
-def test_load_config_uses_custom_room_name_words():
+def test_load_config_ignores_room_name_words_environment_override():
     config = load_config({"SECRET_KEY": "abc", "ROOM_NAME_WORDS": "temperate,mini,solder"})
-    assert config.room_name_words == ("temperate", "mini", "solder")
-
-
-def test_load_config_rejects_room_name_words_with_too_few_entries():
-    with pytest.raises(RuntimeError, match="ROOM_NAME_WORDS"):
-        load_config({"SECRET_KEY": "abc", "ROOM_NAME_WORDS": "one,two"})
+    assert config.room_name_words == DEFAULT_ROOM_NAME_WORDS
