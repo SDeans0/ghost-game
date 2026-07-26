@@ -24,7 +24,7 @@ async function joinRoom() {
 }
 
 async function poll() {
-  const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}&player_token=${playerToken}`);
+  const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}`, { headers: { 'X-Player-Token': playerToken } });
   if (!response.ok) {
     return;
   }
@@ -51,7 +51,7 @@ async function start() {
 
 window.addEventListener('load', async function () {
   await joinRoom();
-  setInterval(poll, 1000);
+  setInterval(poll, 2000);
 
   const form = document.getElementById('entry');
   form.addEventListener('submit', async function (event) {

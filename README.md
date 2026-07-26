@@ -10,8 +10,8 @@ pip install -r requirements.txt
 
 ```bash
 export SECRET_KEY="change-me-in-production"
-# Optional, defaults to sqlite:///test.db
-# export DATABASE_URL="sqlite:///test.db"
+# Optional, defaults to sqlite:///app.db
+# export DATABASE_URL="sqlite:///app.db"
 ```
 
 # Database setup

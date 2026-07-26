@@ -406,7 +406,7 @@ function handleBeginGame(game_data){
 }
 
 async function poll() {
-  const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}&player_token=${playerToken}`);
+  const response = await fetch(`/api/rooms/${room}/events?since_id=${sinceId}`, { headers: { 'X-Player-Token': playerToken } });
   if (!response.ok) {
     console.error('Polling failed', response.status);
     return;
@@ -431,5 +431,5 @@ async function poll() {
 
 window.addEventListener('load', async function () {
   await joinRoom();
-  setInterval(poll, 1000);
+  setInterval(poll, 2000);
 }, false);

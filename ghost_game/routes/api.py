@@ -48,7 +48,7 @@ def poll_room_events(room: str):
     except ValueError:
         return jsonify({"error": "since_id must be an integer"}), 400
 
-    player_token = request.args.get("player_token")
+    player_token = request.headers.get("X-Player-Token") or request.args.get("player_token")
     events = poll_events(room, since_id, player_token)
     return jsonify({"events": events})
 

@@ -11,6 +11,7 @@ from ghost_game.extensions import db
 from ghost_game.models import Player, Room, RoomEvent
 
 SUPPORTED_GAMES = {"ghost", "ranwords", "blackmaria"}
+MAX_ROOM_NAME_RETRIES = 100
 
 
 def _random_room_name() -> str:
@@ -18,7 +19,7 @@ def _random_room_name() -> str:
 
 
 def _next_room_name() -> str:
-    for _ in range(100):
+    for _ in range(MAX_ROOM_NAME_RETRIES):
         candidate = _random_room_name()
         if Room.query.filter_by(name=candidate).first() is None:
             return candidate
