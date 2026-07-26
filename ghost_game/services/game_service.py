@@ -284,11 +284,11 @@ def submit_blackmaria_pass_cards(room: Room, payload: dict[str, Any]) -> None:
     players = state.get("players", [])
     sender_value = payload.get("player")
     if sender_value is None:
-        abort(400, "Invalid player index")
+        abort(400, "Missing player index")
     try:
         sender = int(sender_value)
     except (TypeError, ValueError):
-        abort(400, "Invalid player index")
+        abort(400, "Player index must be an integer")
 
     n_players = int(state.get("n_players", 0))
     if not players or n_players <= 0 or len(players) != n_players:

@@ -23,7 +23,7 @@ def _seed_blackmaria_room() -> Room:
     return room
 
 
-def test_submit_blackmaria_pass_cards_ignores_client_player_count(app):
+def test_submit_blackmaria_pass_cards_uses_server_player_count(app):
     with app.app_context():
         room = _seed_blackmaria_room()
         submit_blackmaria_pass_cards(
