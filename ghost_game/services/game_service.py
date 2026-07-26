@@ -11,13 +11,12 @@ from ghost_game.extensions import db
 from ghost_game.game_types import GameType
 from ghost_game.models import Player, Room, RoomEvent
 
-def _random_room_name() -> str:
+def _random_room_name(room_name_words: tuple[str, ...]) -> str:
     """Generate a multi-word room name candidate.
 
     Returns:
         str: A lowercase, hyphen-joined room identifier.
     """
-    room_name_words: tuple[str, ...] = current_app.config["ROOM_NAME_WORDS"]
     first, second, third = random.sample(room_name_words, 3)
     return f"{first.lower()}-{second.lower()}-{third.lower()}"
 
@@ -35,8 +34,9 @@ def create_room(game: GameType) -> Room:
         RuntimeError: If a unique room name cannot be allocated.
     """
     room_name_retries: int = current_app.config["ROOM_NAME_RETRIES"]
+    room_name_words: tuple[str, ...] = current_app.config["ROOM_NAME_WORDS"]
     for _ in range(room_name_retries):
-        room = Room(name=_random_room_name(), game=game.value, state="{}")
+        room = Room(name=_random_room_name(room_name_words), game=game.value, state="{}")
         db.session.add(room)
         try:
             db.session.commit()

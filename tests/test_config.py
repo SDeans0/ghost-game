@@ -23,3 +23,8 @@ def test_load_config_rejects_non_positive_retry_count():
 def test_load_config_uses_custom_room_name_words():
     config = load_config({"SECRET_KEY": "abc", "ROOM_NAME_WORDS": "temperate,mini,solder"})
     assert config.room_name_words == ("temperate", "mini", "solder")
+
+
+def test_load_config_rejects_room_name_words_with_too_few_entries():
+    with pytest.raises(RuntimeError, match="ROOM_NAME_WORDS"):
+        load_config({"SECRET_KEY": "abc", "ROOM_NAME_WORDS": "one,two"})

@@ -18,13 +18,19 @@ def test_create_room_uses_multiword_name(client):
 
 
 def test_create_room_uses_configured_room_name_words(client):
+    original_words = client.application.config["ROOM_NAME_WORDS"]
     client.application.config["ROOM_NAME_WORDS"] = ("temperate", "normal", "solder")
-    response = client.post("/api/rooms", json={"game": "ghost"})
-    assert response.status_code == 201
-    room_name = response.get_json()["room"]
-    parts = room_name.split("-")
-    assert len(parts) == 3
-    assert set(parts) == {"temperate", "normal", "solder"}
+    try:
+        response = client.post("/api/rooms", json={"game": "ghost"})
+        assert response.status_code == 201
+        room_name = response.get_json()["room"]
+        parts = room_name.split("-")
+        allowed_words = {"temperate", "normal", "solder"}
+        assert len(parts) == 3
+        assert all(part in allowed_words for part in parts)
+        assert set(parts) == allowed_words
+    finally:
+        client.application.config["ROOM_NAME_WORDS"] = original_words
 
 
 def test_create_room_route_accepts_valid_enum(client):

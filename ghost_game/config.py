@@ -7,6 +7,7 @@ import words
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "app.db"
+DEFAULT_ROOM_NAME_WORDS = tuple(words.words)
 
 
 @dataclass(frozen=True)
@@ -15,7 +16,7 @@ class AppConfig:
     sqlalchemy_database_uri: str
     sqlalchemy_track_modifications: bool = False
     room_name_retries: int = 100
-    room_name_words: tuple[str, ...] = tuple(words.words)
+    room_name_words: tuple[str, ...] = DEFAULT_ROOM_NAME_WORDS
 
     def as_flask_mapping(self) -> dict[str, str | bool | int | tuple[str, ...]]:
         return {
@@ -37,9 +38,16 @@ def load_config(environ: dict[str, str] | None = None) -> AppConfig:
     room_name_retries = int(source.get("ROOM_NAME_RETRIES", "100"))
     if room_name_retries < 1:
         raise RuntimeError("ROOM_NAME_RETRIES must be a positive integer")
-    room_name_words = tuple(word.strip() for word in source.get("ROOM_NAME_WORDS", "").split(",") if word.strip())
+    configured_room_name_words = source.get("ROOM_NAME_WORDS", "").split(",")
+    room_name_words = tuple(
+        stripped_word
+        for stripped_word in (word.strip() for word in configured_room_name_words)
+        if stripped_word
+    )
     if not room_name_words:
-        room_name_words = tuple(words.words)
+        room_name_words = DEFAULT_ROOM_NAME_WORDS
+    if len(room_name_words) < 3:
+        raise RuntimeError("ROOM_NAME_WORDS must contain at least 3 words")
 
     return AppConfig(
         secret_key=secret_key,
