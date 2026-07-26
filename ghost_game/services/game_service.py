@@ -17,7 +17,8 @@ def _random_room_name() -> str:
     Returns:
         str: A lowercase, hyphen-joined room identifier.
     """
-    first, second, third = random.sample(words.words, 3)
+    room_name_words: tuple[str, ...] = current_app.config["ROOM_NAME_WORDS"]
+    first, second, third = random.sample(room_name_words, 3)
     return f"{first.lower()}-{second.lower()}-{third.lower()}"
 
 

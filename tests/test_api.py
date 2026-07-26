@@ -17,6 +17,16 @@ def test_create_room_uses_multiword_name(client):
     assert all(parts)
 
 
+def test_create_room_uses_configured_room_name_words(client):
+    client.application.config["ROOM_NAME_WORDS"] = ("temperate", "normal", "solder")
+    response = client.post("/api/rooms", json={"game": "ghost"})
+    assert response.status_code == 201
+    room_name = response.get_json()["room"]
+    parts = room_name.split("-")
+    assert len(parts) == 3
+    assert set(parts) == {"temperate", "normal", "solder"}
+
+
 def test_create_room_route_accepts_valid_enum(client):
     response = client.post("/api/rooms", json={"game": GameType.RANWORDS.value})
     assert response.status_code == 201

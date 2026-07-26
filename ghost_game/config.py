@@ -2,6 +2,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+import words
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = BASE_DIR / "app.db"
@@ -13,13 +15,15 @@ class AppConfig:
     sqlalchemy_database_uri: str
     sqlalchemy_track_modifications: bool = False
     room_name_retries: int = 100
+    room_name_words: tuple[str, ...] = tuple(words.words)
 
-    def as_flask_mapping(self) -> dict[str, str | bool | int]:
+    def as_flask_mapping(self) -> dict[str, str | bool | int | tuple[str, ...]]:
         return {
             "SECRET_KEY": self.secret_key,
             "SQLALCHEMY_DATABASE_URI": self.sqlalchemy_database_uri,
             "SQLALCHEMY_TRACK_MODIFICATIONS": self.sqlalchemy_track_modifications,
             "ROOM_NAME_RETRIES": self.room_name_retries,
+            "ROOM_NAME_WORDS": self.room_name_words,
         }
 
 
@@ -33,9 +37,13 @@ def load_config(environ: dict[str, str] | None = None) -> AppConfig:
     room_name_retries = int(source.get("ROOM_NAME_RETRIES", "100"))
     if room_name_retries < 1:
         raise RuntimeError("ROOM_NAME_RETRIES must be a positive integer")
+    room_name_words = tuple(word.strip() for word in source.get("ROOM_NAME_WORDS", "").split(",") if word.strip())
+    if not room_name_words:
+        room_name_words = tuple(words.words)
 
     return AppConfig(
         secret_key=secret_key,
         sqlalchemy_database_uri=database_url,
         room_name_retries=room_name_retries,
+        room_name_words=room_name_words,
     )
