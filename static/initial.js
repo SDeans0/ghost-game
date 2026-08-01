@@ -1,26 +1,27 @@
-var socket = io();
+async function createRoom(game) {
+  const response = await fetch('/api/rooms', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ game })
+  });
 
-socket.on('connect', function() {
-  console.log('connected');
-});
+  if (!response.ok) {
+    alert('Failed to create room');
+    return;
+  }
 
-socket.on('newGame', function(msg){
-  window.sessionStorage.setItem('room',msg.room);
-  console.log('joined room');
-})
-
-socket.on('redirect', function (data) {
+  const data = await response.json();
   window.location = data.url;
-});
-
-function newGhost(){
-  socket.emit('newGame',{game:'ghost'});
 }
 
-function newRanwords(){
-  socket.emit('newGame',{game:'ranwords'});
+function newGhost() {
+  createRoom('ghost');
 }
 
-function newBlackmaria(){
-  socket.emit('newGame',{game:'blackmaria'});
+function newRanwords() {
+  createRoom('ranwords');
+}
+
+function newBlackmaria() {
+  createRoom('blackmaria');
 }

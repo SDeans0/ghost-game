@@ -764,4 +764,4 @@ words = ['Accountant',
 
 if __name__ == '__main__':
     import random
-    print(random.choice[words])
+    print(random.choice(words))

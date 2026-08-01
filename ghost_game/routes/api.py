@@ -1,0 +1,149 @@
+from flask import Blueprint, jsonify, request, url_for
+
+from ghost_game.game_types import GameType
+from ghost_game.services.game_service import (
+    create_room,
+    ensure_player_in_room,
+    get_or_create_player,
+    get_room_or_404,
+    poll_events,
+    start_blackmaria_game,
+    start_ghost_game,
+    start_ranwords_game,
+    submit_blackmaria_card,
+    submit_blackmaria_pass_cards,
+    submit_ranwords_message,
+)
+
+api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+
+def _parse_game_type(game_value: str | None) -> GameType | None:
+    """Parse a raw game identifier to the corresponding enum value.
+
+    Args:
+        game_value: Raw game identifier from a request payload.
+
+    Returns:
+        Parsed enum value, or ``None`` if invalid.
+    """
+    if not game_value:
+        return None
+    try:
+        return GameType(game_value)
+    except ValueError:
+        return None
+
+
+@api_bp.post("/rooms")
+def create_room_route():
+    """Create a room for a supported game type."""
+    data = request.get_json(silent=True) or {}
+    game = _parse_game_type(data.get("game"))
+    if game is None:
+        return jsonify({"error": "Unsupported game"}), 400
+    try:
+        room = create_room(game)
+    except RuntimeError:
+        return jsonify({"error": "Could not allocate room"}), 503
+    return (
+        jsonify({
+            "room": room.name,
+            "game": room.game,
+            "url": url_for("pages.start_game", game=room.game, room=room.name),
+        }),
+        201,
+    )
+
+
+@api_bp.post("/rooms/<room>/join")
+def join_room_route(room: str):
+    """Join an existing room and return a player token.
+
+    Args:
+        room: Room identifier.
+    """
+    room_obj = get_room_or_404(room)
+    data = request.get_json(silent=True) or {}
+    player = get_or_create_player(room_obj, data.get("player_token"))
+    return jsonify({"room": room_obj.name, "game": room_obj.game, "player_token": player.token})
+
+
+@api_bp.get("/rooms/<room>/events")
+def poll_room_events(room: str):
+    """Poll room events after a cursor.
+
+    Args:
+        room: Room identifier.
+    """
+    get_room_or_404(room)
+    try:
+        since_id = int(request.args.get("since_id", default="0"))
+    except ValueError:
+        return jsonify({"error": "since_id must be an integer"}), 400
+
+    player_token = request.headers.get("X-Player-Token") or request.args.get("player_token")
+    events = poll_events(room, since_id, player_token)
+    return jsonify({"events": events})
+
+
+@api_bp.post("/rooms/<room>/start")
+def start_room_game(room: str):
+    """Start the selected room's game.
+
+    Args:
+        room: Room identifier.
+    """
+    room_obj = get_room_or_404(room)
+    data = request.get_json(silent=True) or {}
+    player_token = data.get("player_token")
+
+    if player_token:
+        ensure_player_in_room(room_obj.name, player_token)
+
+    game = _parse_game_type(room_obj.game)
+    if game is None:
+        return jsonify({"error": "Unsupported game"}), 400
+
+    if game == GameType.GHOST:
+        start_ghost_game(room_obj)
+    elif game == GameType.RANWORDS:
+        start_ranwords_game(room_obj)
+    elif game == GameType.BLACKMARIA:
+        start_blackmaria_game(room_obj, int(data.get("n_players", 0)))
+
+    return jsonify({"ok": True})
+
+
+@api_bp.post("/rooms/<room>/actions")
+def room_actions(room: str):
+    """Submit an in-game action for the room.
+
+    Args:
+        room: Room identifier.
+    """
+    room_obj = get_room_or_404(room)
+    data = request.get_json(silent=True) or {}
+    action = data.get("action")
+    payload = data.get("payload", {})
+    player_token = data.get("player_token")
+
+    if not player_token:
+        return jsonify({"error": "player_token is required"}), 400
+
+    ensure_player_in_room(room_obj.name, player_token)
+
+    game = _parse_game_type(room_obj.game)
+    if game is None:
+        return jsonify({"error": "Unsupported game"}), 400
+
+    if game == GameType.RANWORDS and action == "message":
+        submit_ranwords_message(room_obj, payload.get("msg", ""))
+    elif game == GameType.BLACKMARIA and action == "card_played":
+        submit_blackmaria_card(room_obj, payload)
+    elif game == GameType.BLACKMARIA and action == "pass_cards":
+        submit_blackmaria_pass_cards(room_obj, payload)
+    else:
+        return jsonify({"error": "Unsupported action"}), 400
+
+    return jsonify({"ok": True})
