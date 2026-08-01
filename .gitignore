@@ -1,3 +1,5 @@
 */test.db
 static/node_modules/
 __pycache__
+venv/*
+app.db

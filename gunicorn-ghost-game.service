@@ -1,0 +1,42 @@
+[Unit]
+Description=Gunicorn instance to serve Ghost Game application
+After=network.target
+
+[Service]
+# User and group to run the service
+User=root
+Group=root
+
+# Working directory
+WorkingDirectory=/root/ghost-game
+
+# Environment variables
+Environment="PATH=/root/ghost-game/venv/bin"
+Environment="FLASK_APP=app.py"
+Environment="FLASK_ENV=production"
+
+# Gunicorn command
+# -w 2: 2 worker processes (adjust based on CPU cores: 2-4 x NUM_CORES)
+# -b 127.0.0.1:8000: Bind to localhost on port 8000
+# --timeout 60: Worker timeout (increase if requests take longer)
+# --access-logfile: Access log location
+# --error-logfile: Error log location
+ExecStart=/root/ghost-game/venv/bin/gunicorn \
+    --workers 2 \
+    --bind 127.0.0.1:8000 \
+    --timeout 60 \
+    --access-logfile /var/log/gunicorn/ghost-game-access.log \
+    --error-logfile /var/log/gunicorn/ghost-game-error.log \
+    --log-level info \
+    app:app
+
+# Restart policy
+Restart=always
+RestartSec=5
+
+# Security settings
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
